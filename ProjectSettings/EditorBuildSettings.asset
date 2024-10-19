@@ -4,7 +4,10 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/PhysicalCharacterController/Demo Scenes/demo Scene 1.unity
+    guid: e7748e91b3a3144678bc5bcc15069a9f
   m_configObjects:
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: b682da05d670049aba0612e8955605de,
       type: 2}
