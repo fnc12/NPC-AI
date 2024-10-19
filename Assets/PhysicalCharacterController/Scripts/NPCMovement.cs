@@ -148,15 +148,18 @@ public class NPCMovement : MonoBehaviour
 
             if (heyCooldown <= 0) {
                 var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+                var targetSquaredDistance = 1.5f * 1.5f;
                 foreach (var player in allPlayers) {
                     if (player == gameObject) continue;
                     var otherTransform = player.transform;
-                    var distance = Vector3.Distance(transform.position, otherTransform.position);
-                    if (distance < 1.5f) {
-                        var timeToLive = 1.5f;
-                        var heyMessage = heyMessages[Random.Range(0, heyMessages.Length)];
-                        Say(heyMessage.text, timeToLive, heyMessage.type);
-                        heyCooldown = timeToLive;
+                    var squaredDistance = (transform.position - otherTransform.position).sqrMagnitude;
+                    if (squaredDistance < targetSquaredDistance) {
+                        if (Random.value < 0.5f) {
+                            var timeToLive = 1.5f;
+                            var heyMessage = heyMessages[Random.Range(0, heyMessages.Length)];
+                            Say(heyMessage.text, timeToLive, heyMessage.type);
+                            heyCooldown = timeToLive;
+                        }
                         break;
                     }
                 }
@@ -210,7 +213,7 @@ public class NPCMovement : MonoBehaviour
 
         transform.Translate(Vector3.forward * affectedSpeed * Time.deltaTime);
         // Если достигли текущего waypoint'а, переходим к следующему
-        if (Vector3.Distance(transform.position, waypoints[currentWaypointIndex].position) < 1f)
+        if ((transform.position - waypoints[currentWaypointIndex].position).sqrMagnitude < 1f)
         {
             currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
         }
@@ -335,155 +338,3 @@ public class NPCMovement : MonoBehaviour
         cachedDirection = Vector3.zero;
     }
 }
-
-
-/*[RequireComponent(typeof(CharacterController))]
-public class NPCMovement : MonoBehaviour
-{
-    public CharacterController cc { get; private set; }
-
-    [Header("Ground Check")]
-    public bool isGround;
-    public float groundAngle;
-    public Vector3 groundNormal { get; private set; }
-
-    [Header("Movement")]
-    public float speed = 3f;  // Скорость NPC
-    private Vector3 moveVelocity;
-
-    [Header("Obstacle Avoidance")]
-    public float detectionDistance = 2f; // Дистанция для проверки на препятствие
-    public LayerMask obstacleLayer;      // Слой препятствий
-    public float avoidanceSpeed = 2f;    // Скорость обхода препятствий
-
-    [Header("Waypoints")]
-    public Transform[] waypoints;  // Массив объектов-целей
-    private int currentWaypointIndex = 0;  // Индекс текущей цели
-
-    private void Start()
-    {
-        cc = GetComponent<CharacterController>();
-
-        // Устанавливаем начальную цель — первый элемент массива waypoints
-        if (waypoints.Length > 0)
-        {
-            currentWaypointIndex = 0;
-        }
-    }
-
-    private void Update()
-    {
-        GroundCheck();
-
-        if (isGround)
-        {
-            MoveTowardsWaypoint();
-        }
-
-        GravityUpdate();
-        
-        cc.Move(moveVelocity * Time.deltaTime); // Движение с использованием CharacterController
-
-        // Проверка достижения текущей цели
-        if (waypoints.Length > 0 && Vector3.Distance(transform.position, waypoints[currentWaypointIndex].position) < 0.5f)
-        {
-            // Переход к следующей цели
-            currentWaypointIndex = (currentWaypointIndex + 1) % waypoints.Length;
-        }
-    }
-
-    private void MoveTowardsWaypoint()
-    {
-        if (waypoints.Length == 0) return;
-
-        // Debug.Log("MoveTowardsWaypoint");
-
-        // Получаем текущую точку назначения
-        Vector3 targetPosition = waypoints[currentWaypointIndex].position;
-        Vector3 directionToTarget = (targetPosition - transform.position).normalized;
-
-        // Проверяем наличие препятствий
-        if (IsObstacleInFront(directionToTarget))
-        {
-            // Если есть препятствие, изменяем направление
-            Vector3 avoidanceDirection = GetAvoidanceDirection(directionToTarget);
-            moveVelocity = avoidanceDirection * avoidanceSpeed;
-        }
-        else
-        {
-            // Если препятствий нет, движемся к цели
-            moveVelocity = directionToTarget * speed;
-        }
-
-        Debug.Log("MoveVelocity: " + moveVelocity.magnitude);
-    }
-
-    private bool IsObstacleInFront(Vector3 direction)
-    {
-        // Проверка на наличие препятствия прямо перед NPC
-        return Physics.Raycast(transform.position, direction, detectionDistance, obstacleLayer);
-    }
-
-    private Vector3 GetAvoidanceDirection(Vector3 originalDirection)
-    {
-        // Пытаемся найти обходное направление, используя несколько проверок
-        Vector3 left = Quaternion.Euler(0, -90, 0) * originalDirection; // Налево
-        Vector3 right = Quaternion.Euler(0, 90, 0) * originalDirection; // Направо
-        Vector3 forward = originalDirection; // Вперед
-
-        // Проверяем, есть ли препятствия слева, справа и впереди
-        bool frontClear = !IsObstacleInFront(forward);
-        bool leftClear = !IsObstacleInFront(left);
-        bool rightClear = !IsObstacleInFront(right);
-
-        Debug.Log("Front: " + frontClear + ", Left: " + leftClear + ", Right: " + rightClear);
-
-        // Определяем направление обхода
-        if (frontClear && (leftClear || rightClear))
-        {
-            // Если впереди свободно и одно из боковых направлений свободно, идем вперед
-            var result = forward * speed;
-            Debug.Log("Going forward for " + result.magnitude + " units");            
-            return result;
-        }
-        else if (leftClear)
-        {
-            var result = left * avoidanceSpeed;
-            Debug.Log("Going left for " + result.magnitude + " units");
-            return result; // Если слева свободно, идем налево
-        }
-        else if (rightClear)
-        {
-            var result = right * avoidanceSpeed;
-            Debug.Log("Going right for " + result.magnitude + " units");
-            return result; // Если справа свободно, идем направо
-        }
-        else
-        {
-            Debug.Log("No way to go");
-            return -originalDirection * avoidanceSpeed;
-        }
-    }
-
-    private void GravityUpdate()
-    {
-        if (!isGround)
-        {
-            moveVelocity.y -= 9.81f * Time.deltaTime; // Гравитация, когда NPC не на земле
-        }
-    }
-
-    private void GroundCheck()
-    {
-        if (Physics.SphereCast(transform.position, cc.radius, Vector3.down, out RaycastHit hit, cc.height / 2 - cc.radius + 0.01f))
-        {
-            isGround = true;
-            groundAngle = Vector3.Angle(Vector3.up, hit.normal);
-            groundNormal = hit.normal;
-        }
-        else
-        {
-            isGround = false;
-        }
-    }
-}*/
