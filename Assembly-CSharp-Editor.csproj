@@ -1226,6 +1226,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp.csproj" />
+    <ProjectReference Include="VikingCrew.Tools.Ui.SpeechBubbleManager.csproj" />
+    <ProjectReference Include="VikingCrew.Tools.Ui.SpeechBubbleManager.Editor.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>

@@ -64,6 +64,7 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.23f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/Viking Crew Tools/Demos/UISpeechController.cs" />
     <Compile Include="Assets/RainManager.cs" />
     <Compile Include="Assets/PhysicalCharacterController/Scripts/NPCMovement.cs" />
     <Compile Include="Assets/PhysicalCharacterController/Scripts/PlatformMovement.cs" />
@@ -71,7 +72,11 @@
     <Compile Include="Assets/TutorialInfo/Scripts/Readme.cs" />
     <Compile Include="Assets/PhysicalCharacterController/Scripts/PlayerInput.cs" />
     <Compile Include="Assets/PhysicalCharacterController/Scripts/PhysicalCC.cs" />
+    <Compile Include="Assets/Viking Crew Tools/Camera controls/MouseOrbitImproved.cs" />
+    <Compile Include="Assets/Viking Crew Tools/Demos/SayRandomThingsBehaviour.cs" />
     <Compile Include="Assets/PhysicalCharacterController/Scripts/CameraController.cs" />
+    <Compile Include="Assets/Viking Crew Tools/Demos/2d scene/RandomMovementBehaviour.cs" />
+    <Compile Include="Assets/Viking Crew Tools/Demos/ScriptedDialogueBehaviour.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -1168,6 +1173,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="VikingCrew.Tools.Ui.SpeechBubbleManager.csproj" />
+    <ProjectReference Include="VikingCrew.Tools.Ui.SpeechBubbleManager.Editor.csproj" />
   </ItemGroup>
   <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
   <ItemGroup>

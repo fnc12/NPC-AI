@@ -397,6 +397,8 @@
 -r:"Library/Bee/artifacts/200b0aE.dag/Unity.VSCode.Editor.ref.dll"
 -r:"Library/Bee/artifacts/200b0aE.dag/UnityEditor.UI.ref.dll"
 -r:"Library/Bee/artifacts/200b0aE.dag/UnityEngine.UI.ref.dll"
+-r:"Library/Bee/artifacts/200b0aE.dag/VikingCrew.Tools.Ui.SpeechBubbleManager.Editor.ref.dll"
+-r:"Library/Bee/artifacts/200b0aE.dag/VikingCrew.Tools.Ui.SpeechBubbleManager.ref.dll"
 -analyzer:"/Applications/Unity/Hub/Editor/6000.0.23f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.Properties.SourceGenerator.dll"
 -analyzer:"/Applications/Unity/Hub/Editor/6000.0.23f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.SourceGenerators.dll"
 -analyzer:"/Applications/Unity/Hub/Editor/6000.0.23f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll"
@@ -408,6 +410,11 @@
 "Assets/PhysicalCharacterController/Scripts/PlayerInput.cs"
 "Assets/RainManager.cs"
 "Assets/TutorialInfo/Scripts/Readme.cs"
+"Assets/Viking Crew Tools/Camera controls/MouseOrbitImproved.cs"
+"Assets/Viking Crew Tools/Demos/2d scene/RandomMovementBehaviour.cs"
+"Assets/Viking Crew Tools/Demos/SayRandomThingsBehaviour.cs"
+"Assets/Viking Crew Tools/Demos/ScriptedDialogueBehaviour.cs"
+"Assets/Viking Crew Tools/Demos/UISpeechController.cs"
 -langversion:9.0
 /deterministic
 /optimize+

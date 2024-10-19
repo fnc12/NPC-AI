@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4313a589987708e42a140d05881b745d
+DefaultImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 75417
+  packageName: Speech Bubble Manager
+  packageVersion: 1.5.0
+  assetPath: Assets/Viking Crew Tools/UI/SpeechBubbleManager/integrations/Behaviour
+    designer integration/BehaviourDesignerIntegration.unitypackage
+  uploadId: 596222

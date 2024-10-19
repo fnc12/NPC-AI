@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using VikingCrew.Tools.UI; 
 
 public class NPCMovement : MonoBehaviour
 {
@@ -72,6 +73,10 @@ public class NPCMovement : MonoBehaviour
     private Vector3 cachedDirection; // Кэшируемый результат Raycast
     private IState state = new MovingState();
 
+    void Start() {
+        
+    }
+
     void Update()
     {
         if (state.IsWaiting()) {
@@ -128,9 +133,14 @@ public class NPCMovement : MonoBehaviour
             if (runningState.waitTime > 1.0f) {
                 state = new MovingState();
                 Debug.Log("Running -> Moving");
+                Say("Phew!");
                 return;
             }
         }
+    }
+
+    private void Say(string text) {
+        SpeechBubbleManager.Instance.AddSpeechBubble(transform, text, SpeechBubbleManager.SpeechbubbleType.NORMAL, 1.5f);
     }
 
     private Vector3 GetCurrentDirection() {
