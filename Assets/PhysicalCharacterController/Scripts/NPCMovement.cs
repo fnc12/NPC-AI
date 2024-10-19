@@ -72,6 +72,26 @@ public class NPCMovement : MonoBehaviour
     private int currentWaypointIndex = 0;
     private Vector3 cachedDirection; // Кэшируемый результат Raycast
     private IState state = new MovingState();
+    private float heyCooldown = 0;
+    struct Message {
+        public string text;
+        public SpeechBubbleManager.SpeechbubbleType type;
+    }
+    private Message[] heyMessages = new Message[] {
+        new Message { text = "Hey!", type = SpeechBubbleManager.SpeechbubbleType.ANGRY },
+        new Message { text = "Hi!", type = SpeechBubbleManager.SpeechbubbleType.ANGRY },
+        new Message { text = "Hey, what's up?", type = SpeechBubbleManager.SpeechbubbleType.ANGRY },
+        new Message { text = "Hey, how are you?", type = SpeechBubbleManager.SpeechbubbleType.ANGRY },
+        new Message { text = "Hey, how's it going?", type = SpeechBubbleManager.SpeechbubbleType.ANGRY },
+        new Message { text = "Hey, what's up?", type = SpeechBubbleManager.SpeechbubbleType.ANGRY },
+        new Message { text = "Hey, how are you?", type = SpeechBubbleManager.SpeechbubbleType.ANGRY },
+        new Message { text = "Hey, how's it going?", type = SpeechBubbleManager.SpeechbubbleType.ANGRY },
+        new Message { text = "Cutie!", type = SpeechBubbleManager.SpeechbubbleType.NORMAL }, 
+        new Message { text = "I know her!", type = SpeechBubbleManager.SpeechbubbleType.NORMAL }, 
+        new Message { text = "I know him!", type = SpeechBubbleManager.SpeechbubbleType.NORMAL }, 
+        new Message { text = "Cool hair!", type = SpeechBubbleManager.SpeechbubbleType.NORMAL }, 
+        // new Message { text = "Cutie!", type = SpeechBubbleManager.SpeechbubbleType.NORMAL }, 
+    };
 
     void Start() {
         
@@ -125,6 +145,22 @@ public class NPCMovement : MonoBehaviour
             }
         } else if (state.IsMoving()) {
             MoveTowardsWaypoint(GetCurrentDirection());
+
+            if (heyCooldown <= 0) {
+                var allPlayers = GameObject.FindGameObjectsWithTag("Player");
+                foreach (var player in allPlayers) {
+                    if (player == gameObject) continue;
+                    var otherTransform = player.transform;
+                    var distance = Vector3.Distance(transform.position, otherTransform.position);
+                    if (distance < 1.5f) {
+                        var timeToLive = 1.5f;
+                        var heyMessage = heyMessages[Random.Range(0, heyMessages.Length)];
+                        Say(heyMessage.text, timeToLive, heyMessage.type);
+                        heyCooldown = timeToLive;
+                        break;
+                    }
+                }
+            }
         } else if (state.IsRunning()) {
             var runningState = (RunningState)state;
             Vector3 direction = runningState.Direction;
@@ -133,14 +169,23 @@ public class NPCMovement : MonoBehaviour
             if (runningState.waitTime > 1.0f) {
                 state = new MovingState();
                 Debug.Log("Running -> Moving");
-                Say("Phew!");
+                if (Random.value < 0.5f) {
+                    Say("Phew!", 1.5f);
+                }
                 return;
+            }
+        }
+
+        if (heyCooldown > 0) {
+            heyCooldown -= Time.deltaTime;
+            if (heyCooldown < 0) {
+                heyCooldown = 0;
             }
         }
     }
 
-    private void Say(string text) {
-        SpeechBubbleManager.Instance.AddSpeechBubble(transform, text, SpeechBubbleManager.SpeechbubbleType.NORMAL, 1.5f);
+    private void Say(string text, float timeToLive = 1.5f, SpeechBubbleManager.SpeechbubbleType type = SpeechBubbleManager.SpeechbubbleType.NORMAL) {
+        SpeechBubbleManager.Instance.AddSpeechBubble(transform, text, type, timeToLive);
     }
 
     private Vector3 GetCurrentDirection() {
