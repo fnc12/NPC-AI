@@ -64,6 +64,7 @@
     <Analyzer Include="/Applications/Unity/Hub/Editor/6000.0.23f1/Unity.app/Contents/Tools/Unity.SourceGenerators/Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets/RainManager.cs" />
     <Compile Include="Assets/PhysicalCharacterController/Scripts/NPCMovement.cs" />
     <Compile Include="Assets/PhysicalCharacterController/Scripts/PlatformMovement.cs" />
     <Compile Include="Assets/PhysicalCharacterController/Scripts/CharacterMover.cs" />

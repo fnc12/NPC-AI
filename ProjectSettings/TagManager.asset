@@ -8,6 +8,7 @@ TagManager:
   - item
   - Building
   - Vehicle
+  - Hat
   layers:
   - Default
   - TransparentFX

@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/PhysicalCharacterController/Demo Scenes/demo Scene 1.unity
+- path: Assets/PhysicalCharacterController/Demo Scenes/demo Scene.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0

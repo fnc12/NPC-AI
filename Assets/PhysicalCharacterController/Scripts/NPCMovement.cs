@@ -133,14 +133,6 @@ public class NPCMovement : MonoBehaviour
         }
     }
 
-    void OnGUI() {
-        // string labelText = "Hello, World!";  // Текст метки
-        Vector2 labelPosition = new Vector2(10, 10);  // Позиция метки на экране
-        int labelWidth = 200;
-        int labelHeight = 50;
-        GUI.Label(new Rect(labelPosition.x, labelPosition.y, labelWidth, labelHeight), state.ToString());
-    }
-
     private Vector3 GetCurrentDirection() {
         return (waypoints[currentWaypointIndex].position - transform.position).normalized;
     }
