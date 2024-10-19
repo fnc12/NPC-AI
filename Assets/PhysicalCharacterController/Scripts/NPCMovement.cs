@@ -10,6 +10,8 @@ public class NPCMovement : MonoBehaviour
         bool IsRunning();
 
         float Speed();
+
+        string ToString();
     }
 
     class MovingState : IState {
@@ -19,6 +21,10 @@ public class NPCMovement : MonoBehaviour
 
         public float Speed() {
             return 5;
+        }
+
+        public string ToString() {
+            return "Moving";
         }
     }
 
@@ -33,6 +39,10 @@ public class NPCMovement : MonoBehaviour
         public float Speed() {
             return 0;
         }
+
+        public string ToString() {
+            return "Waiting";
+        }
     }
 
     class RunningState : IState {
@@ -43,12 +53,19 @@ public class NPCMovement : MonoBehaviour
         public float Speed() {
             return 5 * 2;
         }
+
+        public Vector3 Direction = Vector3.zero;
+        public float waitTime = 0.0f;
+
+        public string ToString() {
+            return "Running";
+        }
     }
 
     public Transform[] waypoints;    // Точки пути
     public float initialSpeed = 5f;         // Скорость передвижения
     public float turnSpeed = 5f;     // Скорость поворота
-    public float detectionDistance = 5f; // Дистанция для Raycast'ов
+    public float detectionDistance = 4; // Дистанция для Raycast'ов
     public LayerMask obstacleLayer;  // Слой для проверки препятствий
 
     private int currentWaypointIndex = 0;
@@ -60,31 +77,91 @@ public class NPCMovement : MonoBehaviour
         if (state.IsWaiting()) {
             var waitingState = (WaitingState)state;
             waitingState.waitTime += Time.deltaTime;
+
+            Vector3 direction = GetCurrentDirection();
+            Vector3 leftRayDirection = Quaternion.Euler(0, -90, 0) * direction;
+            Vector3 rightRayDirection = Quaternion.Euler(0, 90, 0) * direction;
+            Vector3 backRayDirection = Quaternion.Euler(0, 180, 0) * direction;
+
+            //  проверим не пропал ли объект ожидания
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, direction, out hit, detectionDistance, obstacleLayer)) {
+                Debug.DrawRay(transform.position, direction * hit.distance, Color.red);
+            } else {    //   нет препятствий
+                state = new MovingState();
+                Debug.Log("Waiting -> Moving");
+                return;
+            }
+
+            //   проверим наличие опасности слева
+            if (Physics.Raycast(transform.position, leftRayDirection, out hit, detectionDistance * 2, obstacleLayer)) {
+                Debug.DrawRay(transform.position, leftRayDirection * hit.distance, Color.red);
+                state = new RunningState() {
+                    Direction = backRayDirection,
+                };
+                Debug.Log("Waiting -> Running, backRayDirection =" + backRayDirection.ToString());
+                return;
+            }
+
+            //   проверим наличие опасности справа
+            if (Physics.Raycast(transform.position, rightRayDirection, out hit, detectionDistance * 2, obstacleLayer)) {
+                Debug.DrawRay(transform.position, rightRayDirection * hit.distance, Color.red);
+                state = new RunningState() {
+                    Direction = backRayDirection,
+                };
+                Debug.Log("Waiting -> Running, backRayDirection =" + backRayDirection.ToString());
+                return;
+            }
+
             if (waitingState.waitTime > 2.0f) {
                 state = new MovingState();
                 Debug.Log("Waiting -> Moving");
                 return;
             }
-        } else if (state.IsMoving() || state.IsRunning()) {
-            MoveTowardsWaypoint();
+        } else if (state.IsMoving()) {
+            MoveTowardsWaypoint(GetCurrentDirection());
+        } else if (state.IsRunning()) {
+            var runningState = (RunningState)state;
+            Vector3 direction = runningState.Direction;
+            MoveTowardsWaypoint(direction);
+            runningState.waitTime += Time.deltaTime;
+            if (runningState.waitTime > 1.0f) {
+                state = new MovingState();
+                Debug.Log("Running -> Moving");
+                return;
+            }
         }
     }
 
+    void OnGUI() {
+        // string labelText = "Hello, World!";  // Текст метки
+        Vector2 labelPosition = new Vector2(10, 10);  // Позиция метки на экране
+        int labelWidth = 200;
+        int labelHeight = 50;
+        GUI.Label(new Rect(labelPosition.x, labelPosition.y, labelWidth, labelHeight), state.ToString());
+    }
+
+    private Vector3 GetCurrentDirection() {
+        return (waypoints[currentWaypointIndex].position - transform.position).normalized;
+    }
+
     // Функция движения к текущей точке
-    private void MoveTowardsWaypoint()
-    {
-        Vector3 direction = (waypoints[currentWaypointIndex].position - transform.position).normalized;
-        
+    private void MoveTowardsWaypoint(Vector3 direction)
+    {        
         // Проверяем на препятствия и корректируем направление
         direction = DetectObstacles(direction);
-
+        
         // Плавный поворот в направлении движения
-        Quaternion targetRotation = Quaternion.LookRotation(direction);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+        if (direction != Vector3.zero) {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, turnSpeed * Time.deltaTime);
+        }
 
         // Двигаемся вперед с постоянной скоростью
-        transform.Translate(Vector3.forward * initialSpeed * Time.deltaTime);
+        var originalSpeed = state.Speed();
+        var affectedSpeed = Random.Range(originalSpeed - 1, originalSpeed + 1);
 
+        transform.Translate(Vector3.forward * affectedSpeed * Time.deltaTime);
         // Если достигли текущего waypoint'а, переходим к следующему
         if (Vector3.Distance(transform.position, waypoints[currentWaypointIndex].position) < 1f)
         {
@@ -105,6 +182,7 @@ public class NPCMovement : MonoBehaviour
         Vector3 rightRayDirection = Quaternion.Euler(0, 45, 0) * direction;
         Vector3 left90RayDirection = Quaternion.Euler(0, -90, 0) * direction;
         Vector3 right90RayDirection = Quaternion.Euler(0, 90, 0) * direction;
+        Vector3 backRayDirection = Quaternion.Euler(0, 180, 0) * direction;
 
         RaycastHit hit;
 
@@ -115,7 +193,7 @@ public class NPCMovement : MonoBehaviour
                 Debug.Log("Danger from left: " + tag);
                 state = new RunningState();
                 Debug.Log("Moving -> Running");
-                return right90RayDirection;
+                return backRayDirection;
             }
         }
 
@@ -126,7 +204,7 @@ public class NPCMovement : MonoBehaviour
                 Debug.Log("Danger from right: " + tag);
                 state = new RunningState();
                 Debug.Log("Moving -> Running");
-                return left90RayDirection;
+                return backRayDirection;
             }
         }
 
@@ -137,13 +215,15 @@ public class NPCMovement : MonoBehaviour
 
             var collider = hit.collider;
             var tag = collider.tag;
-            Debug.Log("Collider: " + collider.name + ", tag = " + tag);
+            // Debug.Log("Collider: " + collider.name + ", tag = " + tag);
 
             if (tag == "Vehicle") {
                 // speed = 0;
                 state = new WaitingState();
                 Debug.Log("Moving -> Waiting");
                 return direction;
+            } else {
+                Debug.Log("Front building found");
             }
             // Если есть препятствие, меняем направление
             direction += hit.normal * 5f;
